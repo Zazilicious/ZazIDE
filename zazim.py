@@ -9,7 +9,7 @@ import re
 
 # Root window setup
 root = Tk()
-root.title("Zazitor")
+root.title("ZazIDE")
 root.geometry("800x600")
 
 global opened_name
