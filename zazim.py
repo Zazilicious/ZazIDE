@@ -19,13 +19,13 @@ global selected
 selected = False
 
 # Line number widget
-def update_line_numbers(event=None):
+def update_line_numbers(e=False):
     line_numbers.delete(1.0, END)
     for i in range(1, int(m_text.index('end-1c').split('.')[0]) + 1):
         line_numbers.insert(END, f"{i}\n")
 
 # Update syntax highlighting for Python code
-def highlight_syntax(event=None):
+def highlight_syntax(e=False):
     m_text.tag_remove("keyword", "1.0", END)
     m_text.tag_remove("comment", "1.0", END)
     m_text.tag_remove("string", "1.0", END)
