@@ -26,6 +26,7 @@ def update_line_numbers(e=False):
 
 # Update syntax highlighting for Python code
 def highlight_syntax(e=False):
+    print("highlighting syntax")
     m_text.tag_remove("keyword", "1.0", END)
     m_text.tag_remove("comment", "1.0", END)
     m_text.tag_remove("string", "1.0", END)
@@ -34,7 +35,7 @@ def highlight_syntax(e=False):
     for keyword in python_keywords:
         idx = '1.0'
         while True:
-            idx = m_text.search(r'\b' + keyword + r'\b', idx, nocase=True, stopindex=END)
+            idx = m_text.search(r'\y' + keyword + r'\y', idx, nocase=True, stopindex=END, regexp=True)
             if not idx:
                 break
             end_idx = f"{idx}+{len(keyword)}c"
@@ -45,7 +46,7 @@ def highlight_syntax(e=False):
     comment_pattern = r'#.*'
     idx = '1.0'
     while True:
-        idx = m_text.search(comment_pattern, idx, nocase=True, stopindex=END)
+        idx = m_text.search(comment_pattern, idx, nocase=True, stopindex=END, regexp=True)
         if not idx:
             break
         end_idx = f"{idx} lineend"
@@ -56,7 +57,7 @@ def highlight_syntax(e=False):
     string_pattern = r'\".*?\"|\'[^\']*\''
     idx = '1.0'
     while True:
-        idx = m_text.search(string_pattern, idx, nocase=True, stopindex=END)
+        idx = m_text.search(string_pattern, idx, nocase=True, stopindex=END, regexp=True)
         if not idx:
             break
         end_idx = f"{idx}+{len(m_text.get(idx, f'{idx} lineend'))}c"
@@ -187,7 +188,7 @@ m_frame = Frame(root)
 m_frame.pack(pady=5, padx=5)
 
 # Line number widget
-line_numbers = Text(m_frame, width=4, height=30, bg='lightgray', state='disabled', font=("Calibri", 12))
+line_numbers = Text(m_frame, width=4, height=30, bg='lightgray', font=("Calibri", 12))
 line_numbers.pack(side=LEFT, fill=Y)
 line_numbers.bind("<KeyRelease>", update_line_numbers)
 
