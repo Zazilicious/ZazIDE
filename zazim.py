@@ -26,7 +26,6 @@ def update_line_numbers(e=False):
 
 # Update syntax highlighting for Python code
 def highlight_syntax(e=False):
-    print("highlighting syntax")
     m_text.tag_remove("keyword", "1.0", END)
     m_text.tag_remove("comment", "1.0", END)
     m_text.tag_remove("string", "1.0", END)
