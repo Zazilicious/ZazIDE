@@ -30,7 +30,7 @@ def highlight_syntax(e=False):
     m_text.tag_remove("comment", "1.0", END)
     m_text.tag_remove("string", "1.0", END)
 
-    python_keywords = ["def", "class", "import", "from", "if", "else", "elif", "for", "while", "return", "break", "continue", "try", "except", "finally"]
+    python_keywords = ["def", "class", "import", "from", "if", "else", "elif", "for", "while", "return", "break", "continue", "try", "except", "finally", "in", "then"]
     for keyword in python_keywords:
         idx = '1.0'
         while True:
@@ -76,8 +76,8 @@ def new_file():
 def open_file():
     m_text.delete("1.0", END)
     t_file = filedialog.askopenfilename(initialdir="~/", title="Open File",
-                                        filetypes=(("Text Files", "*.txt"), ("HTML Files", "*.html"),
-                                                  ("Python Files", "*.py"), ("All Files", "*.*")))
+                                        filetypes=(("Python", "*.py"), ("HTML Files", "*.html"),
+                                                  ("Text Files", "*.txt"), ("All Files", "*.*")))
     if t_file:
         global opened_name
         opened_name = t_file
@@ -93,9 +93,9 @@ def open_file():
 # Save file
 def save_as_file(e=False):
     global opened_name
-    t_file = filedialog.asksaveasfilename(defaultextension=".*", initialdir="~/", title="Save File",
-                                         filetypes=(("Text Files", "*.txt"), ("HTML Files", "*.html"),
-                                                   ("Python Files", "*.py"), ("All Files", "*.*")))
+    t_file = filedialog.asksaveasfilename(defaultextension=".py", initialdir="~/", title="Save File",
+                                         filetypes=(("Python Files", "*.py"), ("HTML Files", "*.html"),
+                                                   ("Text Files", "*.txt"), ("All Files", "*.*")))
     opened_name = t_file
     t_file = open(t_file, 'w')
     t_file.write(m_text.get(1.0, END))
@@ -255,4 +255,6 @@ root.bind('<Control-Key-S>', save_as_file)
 # Initial setup
 update_line_numbers()
 root.mainloop()
+
+
 
