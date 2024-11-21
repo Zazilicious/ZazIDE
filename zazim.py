@@ -18,12 +18,6 @@ opened_name = False
 global selected
 selected = False
 
-# Line number widget
-def update_line_numbers(e=False):
-    line_numbers.delete(1.0, END)
-    for i in range(1, int(m_text.index('end-1c').split('.')[0]) + 1):
-        line_numbers.insert(END, f"{i}\n")
-
 # Update syntax highlighting for Python code
 def highlight_syntax(e=False):
     m_text.tag_remove("keyword", "1.0", END)
@@ -70,7 +64,6 @@ def new_file():
     root.title("New File")
     global opened_name
     opened_name = False
-    update_line_numbers()
 
 # Open file
 def open_file():
@@ -87,7 +80,6 @@ def open_file():
         m_text.insert(END, stuff)
         t_file.close()
         root.title(f"Editing: {name}")
-        update_line_numbers()
         highlight_syntax()
 
 # Save file
@@ -186,11 +178,6 @@ def search_text(query, popup):
 m_frame = Frame(root)
 m_frame.pack(pady=5, padx=5)
 
-# Line number widget
-line_numbers = Text(m_frame, width=4, height=30, bg='lightgray', font=("Calibri", 12))
-line_numbers.pack(side=LEFT, fill=Y)
-line_numbers.bind("<KeyRelease>", update_line_numbers)
-
 # Scrollbar
 t_scroll = Scrollbar(m_frame)
 t_scroll.pack(side=RIGHT, fill=Y)
@@ -199,7 +186,7 @@ t_scroll.pack(side=RIGHT, fill=Y)
 m_text = Text(m_frame, width=150, height=30, font=("Calibri", 16), selectbackground="yellow",
               selectforeground="black", undo=True)
 m_text.pack(side=RIGHT)
-m_text.bind("<KeyRelease>", lambda e: [highlight_syntax(e), update_line_numbers(e)])
+m_text.bind("<KeyRelease>", highlight_syntax)
 
 # Config scrollbar
 t_scroll.config(command=m_text.yview)
@@ -253,8 +240,5 @@ root.bind('<Control-Key-s>', save_file)
 root.bind('<Control-Key-S>', save_as_file)
 
 # Initial setup
-update_line_numbers()
 root.mainloop()
-
-
 
