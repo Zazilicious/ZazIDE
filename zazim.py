@@ -58,12 +58,22 @@ def highlight_syntax(e=False):
         m_text.tag_configure("string", foreground="red")
         idx = end_idx
 
+# Update the line counter at the bottom of the screen to show the current line
+def update_cursor_position(event=None):
+    # Get the current position of the cursor
+    cursor_position = m_text.index(INSERT)
+    current_line = cursor_position.split('.')[0]
+    
+    # Update the label at the bottom with the current line number
+    line_count_label.config(text=f"Line: {current_line}")
+
 # Create new file
 def new_file():
     m_text.delete("1.0", END)
     root.title("New File")
     global opened_name
     opened_name = False
+    update_cursor_position()
 
 # Open file
 def open_file():
@@ -80,7 +90,7 @@ def open_file():
         m_text.insert(END, stuff)
         t_file.close()
         root.title(f"Editing: {name}")
-        highlight_syntax()
+        update_cursor_position()
 
 # Save file
 def save_as_file(e=False):
@@ -186,7 +196,7 @@ t_scroll.pack(side=RIGHT, fill=Y)
 m_text = Text(m_frame, width=150, height=30, font=("Calibri", 16), selectbackground="yellow",
               selectforeground="black", undo=True)
 m_text.pack(side=RIGHT)
-m_text.bind("<KeyRelease>", highlight_syntax)
+m_text.bind("<KeyRelease>", lambda e: [highlight_syntax(e), update_cursor_position(e)])
 
 # Config scrollbar
 t_scroll.config(command=m_text.yview)
@@ -238,6 +248,10 @@ root.bind('<Control-Key-A>', select_all)
 root.bind('<Control-Key-a>', select_all)
 root.bind('<Control-Key-s>', save_file)
 root.bind('<Control-Key-S>', save_as_file)
+
+# Line count label at the bottom
+line_count_label = Label(root, text="Line: 1", bd=1, relief=SUNKEN, anchor=W)
+line_count_label.pack(fill=X, side=BOTTOM)
 
 # Initial setup
 root.mainloop()
