@@ -18,53 +18,85 @@ opened_name = False
 global selected
 selected = False
 
-# Update syntax highlighting for Python code
+# Update syntax highlighting for Python, Lua, and JavaScript code
 def highlight_syntax(e=False):
     m_text.tag_remove("keyword", "1.0", END)
     m_text.tag_remove("comment", "1.0", END)
     m_text.tag_remove("string", "1.0", END)
 
-    python_keywords = ["def", "class", "import", "from", "if", "else", "elif", "for", "while", "return", "break", "continue", "try", "except", "finally", "in", "then"]
-    for keyword in python_keywords:
+    # Define syntax rules
+    syntax_rules = {
+        "python": {
+            "keywords": ["def", "class", "import", "from", "if", "else", "elif", "for", "while", "return", "break", "continue", "try", "except", "finally", "in", "then"],
+            "comment": r'#.*',
+            "string": r'\".*?\"|\'[^\']*\''
+        },
+        "lua": {
+            "keywords": ["function", "end", "if", "then", "else", "elseif", "for", "while", "do", "local", "return", "break"],
+            "comment": r'--.*',
+            "string": r'\".*?\"|\'[^\']*\''
+        },
+        "javascript": {
+            "keywords": ["function", "var", "let", "const", "if", "else", "for", "while", "return", "break", "continue", "class", "import", "export", "try", "catch", "finally"],
+            "comment": r'//.*',
+            "string": r'\".*?\"|\'[^\']*\''
+        }
+    }
+
+    # Detect language based on the file extension
+    file_extension = (opened_name.split('.')[-1] if opened_name else "").lower()
+    if file_extension == "py":
+        lang = "python"
+    elif file_extension == "lua":
+        lang = "lua"
+    elif file_extension in ["js", "mjs", "cjs"]:
+        lang = "javascript"
+    else:
+        lang = None
+
+    if lang and lang in syntax_rules:
+        rules = syntax_rules[lang]
+
+        # Highlight keywords
+        for keyword in rules["keywords"]:
+            idx = '1.0'
+            while True:
+                idx = m_text.search(r'\y' + keyword + r'\y', idx, nocase=True, stopindex=END, regexp=True)
+                if not idx:
+                    break
+                end_idx = f"{idx}+{len(keyword)}c"
+                m_text.tag_add("keyword", idx, end_idx)
+                m_text.tag_configure("keyword", foreground="blue")
+                idx = end_idx
+
+        # Highlight comments
+        comment_pattern = rules["comment"]
         idx = '1.0'
         while True:
-            idx = m_text.search(r'\y' + keyword + r'\y', idx, nocase=True, stopindex=END, regexp=True)
+            idx = m_text.search(comment_pattern, idx, nocase=True, stopindex=END, regexp=True)
             if not idx:
                 break
-            end_idx = f"{idx}+{len(keyword)}c"
-            m_text.tag_add("keyword", idx, end_idx)
-            m_text.tag_configure("keyword", foreground="blue")
+            end_idx = f"{idx} lineend"
+            m_text.tag_add("comment", idx, end_idx)
+            m_text.tag_configure("comment", foreground="green")
             idx = end_idx
 
-    comment_pattern = r'#.*'
-    idx = '1.0'
-    while True:
-        idx = m_text.search(comment_pattern, idx, nocase=True, stopindex=END, regexp=True)
-        if not idx:
-            break
-        end_idx = f"{idx} lineend"
-        m_text.tag_add("comment", idx, end_idx)
-        m_text.tag_configure("comment", foreground="green")
-        idx = end_idx
-
-    string_pattern = r'\".*?\"|\'[^\']*\''
-    idx = '1.0'
-    while True:
-        idx = m_text.search(string_pattern, idx, nocase=True, stopindex=END, regexp=True)
-        if not idx:
-            break
-        end_idx = f"{idx}+{len(m_text.get(idx, f'{idx} lineend'))}c"
-        m_text.tag_add("string", idx, end_idx)
-        m_text.tag_configure("string", foreground="red")
-        idx = end_idx
+        # Highlight strings
+        string_pattern = rules["string"]
+        idx = '1.0'
+        while True:
+            idx = m_text.search(string_pattern, idx, nocase=True, stopindex=END, regexp=True)
+            if not idx:
+                break
+            end_idx = f"{idx}+{len(m_text.get(idx, f'{idx} lineend'))}c"
+            m_text.tag_add("string", idx, end_idx)
+            m_text.tag_configure("string", foreground="red")
+            idx = end_idx
 
 # Update the line counter at the bottom of the screen to show the current line
 def update_cursor_position(event=None):
-    # Get the current position of the cursor
     cursor_position = m_text.index(INSERT)
     current_line = cursor_position.split('.')[0]
-    
-    # Update the label at the bottom with the current line number
     line_count_label.config(text=f"Line: {current_line}")
 
 # Create new file
@@ -75,42 +107,39 @@ def new_file():
     opened_name = False
     update_cursor_position()
 
-# Open file
+# Open file and determine syntax
 def open_file():
     m_text.delete("1.0", END)
     t_file = filedialog.askopenfilename(initialdir="~/", title="Open File",
-                                        filetypes=(("Python", "*.py"), ("HTML Files", "*.html"),
-                                                  ("Text Files", "*.txt"), ("All Files", "*.*")))
+                                        filetypes=(("Python", "*.py"), ("Lua Files", "*.lua"),
+                                                   ("JavaScript Files", "*.js"), ("All Files", "*.*")))
     if t_file:
         global opened_name
         opened_name = t_file
         name = t_file
-        t_file = open(t_file, 'r')
-        stuff = t_file.read()
+        with open(t_file, 'r') as f:
+            stuff = f.read()
         m_text.insert(END, stuff)
-        t_file.close()
         root.title(f"Editing: {name}")
+        highlight_syntax()  # Trigger syntax highlighting after loading
         update_cursor_position()
 
 # Save file
 def save_as_file(e=False):
     global opened_name
     t_file = filedialog.asksaveasfilename(defaultextension=".py", initialdir="~/", title="Save File",
-                                         filetypes=(("Python Files", "*.py"), ("HTML Files", "*.html"),
-                                                   ("Text Files", "*.txt"), ("All Files", "*.*")))
+                                         filetypes=(("Python Files", "*.py"), ("Lua Files", "*.lua"),
+                                                    ("JavaScript Files", "*.js"), ("All Files", "*.*")))
     opened_name = t_file
-    t_file = open(t_file, 'w')
-    t_file.write(m_text.get(1.0, END))
-    t_file.close()
+    with open(t_file, 'w') as f:
+        f.write(m_text.get(1.0, END))
     root.title(f"Editing: {opened_name}")
 
-# Save file
 def save_file(e=False):
     global opened_name
     if opened_name:
-        t_file = open(opened_name, 'w')
-        t_file.write(m_text.get(1.0, END))
-        t_file.close()
+        with open(opened_name, 'w') as f:
+            f.write(m_text.get(1.0, END))
         messagebox.showinfo("Saved", "File saved successfully")
     else:
         save_as_file()
@@ -162,28 +191,6 @@ def run_code():
     except Exception as e:
         messagebox.showerror("Error", f"Error executing code:\n{str(e)}")
 
-# Find text
-def find_text():
-    find_popup = Toplevel(root)
-    find_popup.title("Find")
-    find_popup.geometry("300x100")
-    Label(find_popup, text="Find:").pack(pady=5)
-    find_entry = Entry(find_popup, width=30)
-    find_entry.pack(pady=5)
-    Button(find_popup, text="Find", command=lambda: search_text(find_entry.get(), find_popup)).pack(pady=5)
-
-def search_text(query, popup):
-    idx = '1.0'
-    while True:
-        idx = m_text.search(query, idx, nocase=True, stopindex=END)
-        if not idx:
-            break
-        end_idx = f"{idx}+{len(query)}c"
-        m_text.tag_add("search", idx, end_idx)
-        m_text.tag_configure("search", background="yellow")
-        idx = end_idx
-    popup.destroy()
-
 # Frame and Text Widget
 m_frame = Frame(root)
 m_frame.pack(pady=5, padx=5)
@@ -228,31 +235,24 @@ e_menu.add_command(label="Redo", command=m_text.edit_redo)
 e_menu.add_separator()
 e_menu.add_command(label="Select All", command=select_all)
 e_menu.add_command(label="Clear", command=clear_all)
-e_menu.add_separator()
 
 # Run menu
 r_menu = Menu(m_menu, tearoff=False)
 m_menu.add_cascade(label="Run", menu=r_menu)
 r_menu.add_command(label="Run Python", command=run_code)
 
-# Search menu
-s_menu = Menu(m_menu, tearoff=False)
-m_menu.add_cascade(label="Search", menu=s_menu)
-s_menu.add_command(label="Find", command=find_text)
-
-# Edit bindings
-root.bind('<Control-Key-x>', cut_text)
-root.bind('<Control-Key-c>', copy_text)
-root.bind('<Control-Key-v>', paste_text)
-root.bind('<Control-Key-A>', select_all)
-root.bind('<Control-Key-a>', select_all)
-root.bind('<Control-Key-s>', save_file)
-root.bind('<Control-Key-S>', save_as_file)
-
 # Line count label at the bottom
 line_count_label = Label(root, text="Line: 1", bd=1, relief=SUNKEN, anchor=W)
 line_count_label.pack(fill=X, side=BOTTOM)
 
-# Initial setup
+# Bind keyboard shortcuts
+root.bind("<Control-Key-x>", cut_text)
+root.bind("<Control-Key-c>", copy_text)
+root.bind("<Control-Key-v>", paste_text)
+root.bind('<Control-Key-A>', select_all)
+root.bind('<Control-Key-a>', select_all)
+root.bind("<Control-Key-s>", save_file)
+
+# Start main loop
 root.mainloop()
 
