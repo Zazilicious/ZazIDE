@@ -29,17 +29,22 @@ def highlight_syntax(e=False):
         "python": {
             "keywords": ["def", "class", "import", "from", "if", "else", "elif", "for", "while", "return", "break", "continue", "try", "except", "finally", "in", "then"],
             "comment": r'#.*',
-            "string": r'\".*?\"|\'[^\']*\''
+            "string": r'".*?"|\'.*?\''
         },
         "lua": {
             "keywords": ["function", "end", "if", "then", "else", "elseif", "for", "while", "do", "local", "return", "break"],
             "comment": r'--.*',
-            "string": r'\".*?\"|\'[^\']*\''
+            "string": r'".*?"|\'.*?\''
         },
         "javascript": {
             "keywords": ["function", "var", "let", "const", "if", "else", "for", "while", "return", "break", "continue", "class", "import", "export", "try", "catch", "finally"],
             "comment": r'//.*',
-            "string": r'\".*?\"|\'[^\']*\''
+            "string": r'".*?"|\'.*?\''
+        },
+        "puls8": {
+            "keywords": ["NOP", "STC", "STD", "ADD", "LDCI", "LDD", "LDC", "PUSHI", "PUSHA", "LDB", "LDA", "POUT", "STA", "STB", "RSH", "HLT", "JMP", "SUB", "JC", "JZ", "LDAI", "PIN", "PSTAT", "CMP", "CMPI", "AND", "ANDI", "JNZ", "LDDI", "LDACD", "LDBI", "PUSHB", "JSR", "VLFB", "VFBW", "STACD", "ADDI", "VFBBG", "AVAIL18", "AVAIL19", "AVAIL1A", "AVAIL1B", "AVAIL1C", "AVAIL1D", "AVAIL1E", "AVAIL1E", "AVAIL1F", "AVAIL20", "AVAIL21", "AVAIL22", "AVAIL23", "AVAIL24", "AVAIL25", "AVAIL26", "AVAIL27", "AVAIL28", "AVAIL29", "AVAIL2A", "AVAIL2B", "AVAIL2C", "AVAIL2D", "AVAIL2E", "AVAIL2F", "AVAIL30", "AVAIL31", "RTS"],
+            "comment": r'\;.*',
+            "string": r'".*?"'
         }
     }
 
@@ -51,6 +56,8 @@ def highlight_syntax(e=False):
         lang = "lua"
     elif file_extension in ["js", "mjs", "cjs"]:
         lang = "javascript"
+    elif file_extension == "p8":
+        lang = "puls8"
     else:
         lang = None
 
@@ -58,40 +65,28 @@ def highlight_syntax(e=False):
         rules = syntax_rules[lang]
 
         # Highlight keywords
-        for keyword in rules["keywords"]:
-            idx = '1.0'
-            while True:
-                idx = m_text.search(r'\y' + keyword + r'\y', idx, nocase=True, stopindex=END, regexp=True)
-                if not idx:
-                    break
-                end_idx = f"{idx}+{len(keyword)}c"
-                m_text.tag_add("keyword", idx, end_idx)
-                m_text.tag_configure("keyword", foreground="blue")
-                idx = end_idx
+        keyword_pattern = r'\b(' + '|'.join(re.escape(keyword) for keyword in rules["keywords"]) + r')\b'
+        for match in re.finditer(keyword_pattern, m_text.get("1.0", "end-1c")):
+            start_idx = f"1.0+{match.start()}c"
+            end_idx = f"1.0+{match.end()}c"
+            m_text.tag_add("keyword", start_idx, end_idx)
+            m_text.tag_configure("keyword", foreground="blue")
 
         # Highlight comments
         comment_pattern = rules["comment"]
-        idx = '1.0'
-        while True:
-            idx = m_text.search(comment_pattern, idx, nocase=True, stopindex=END, regexp=True)
-            if not idx:
-                break
-            end_idx = f"{idx} lineend"
-            m_text.tag_add("comment", idx, end_idx)
+        for match in re.finditer(comment_pattern, m_text.get("1.0", "end-1c")):
+            start_idx = f"1.0+{match.start()}c"
+            end_idx = f"1.0+{match.end()}c"
+            m_text.tag_add("comment", start_idx, end_idx)
             m_text.tag_configure("comment", foreground="green")
-            idx = end_idx
 
         # Highlight strings
         string_pattern = rules["string"]
-        idx = '1.0'
-        while True:
-            idx = m_text.search(string_pattern, idx, nocase=True, stopindex=END, regexp=True)
-            if not idx:
-                break
-            end_idx = f"{idx}+{len(m_text.get(idx, f'{idx} lineend'))}c"
-            m_text.tag_add("string", idx, end_idx)
+        for match in re.finditer(string_pattern, m_text.get("1.0", "end-1c")):
+            start_idx = f"1.0+{match.start()}c"
+            end_idx = f"1.0+{match.end()}c"
+            m_text.tag_add("string", start_idx, end_idx)
             m_text.tag_configure("string", foreground="red")
-            idx = end_idx
 
 # Update the line counter at the bottom of the screen to show the current line
 def update_cursor_position(event=None):
@@ -111,7 +106,7 @@ def new_file():
 def open_file():
     m_text.delete("1.0", END)
     t_file = filedialog.askopenfilename(initialdir="~/", title="Open File",
-                                        filetypes=(("Python", "*.py"), ("Lua Files", "*.lua"),
+                                        filetypes=(("Python", "*.py"), ("Lua Files", "*.lua"), ("Puls8 Files", "*.p8"), 
                                                    ("JavaScript Files", "*.js"), ("All Files", "*.*")))
     if t_file:
         global opened_name
@@ -128,7 +123,7 @@ def open_file():
 def save_as_file(e=False):
     global opened_name
     t_file = filedialog.asksaveasfilename(defaultextension=".py", initialdir="~/", title="Save File",
-                                         filetypes=(("Python Files", "*.py"), ("Lua Files", "*.lua"),
+                                         filetypes=(("Python Files", "*.py"), ("Lua Files", "*.lua"), ("Puls8 Files", "*.p8"), 
                                                     ("JavaScript Files", "*.js"), ("All Files", "*.*")))
     opened_name = t_file
     with open(t_file, 'w') as f:
@@ -255,4 +250,3 @@ root.bind("<Control-Key-s>", save_file)
 
 # Start main loop
 root.mainloop()
-
