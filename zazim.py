@@ -42,7 +42,7 @@ def highlight_syntax(e=False):
             "string": r'".*?"|\'.*?\''
         },
         "puls8": {
-            "keywords": ["NOP", "STC", "STD", "ADD", "LDCI", "LDD", "LDC", "PUSHI", "PUSHA", "LDB", "LDA", "POUT", "STA", "STB", "RSH", "HLT", "JMP", "SUB", "JC", "JZ", "LDAI", "PIN", "PSTAT", "CMP", "CMPI", "AND", "ANDI", "JNZ", "LDDI", "LDACD", "LDBI", "PUSHB", "JSR", "VLFB", "VFBW", "STACD", "ADDI", "VFBBG", "AVAIL18", "AVAIL19", "AVAIL1A", "AVAIL1B", "AVAIL1C", "AVAIL1D", "AVAIL1E", "AVAIL1E", "AVAIL1F", "AVAIL20", "AVAIL21", "AVAIL22", "AVAIL23", "AVAIL24", "AVAIL25", "AVAIL26", "AVAIL27", "AVAIL28", "AVAIL29", "AVAIL2A", "AVAIL2B", "AVAIL2C", "AVAIL2D", "AVAIL2E", "AVAIL2F", "AVAIL30", "AVAIL31", "RTS"],
+            "keywords": ["NOP", "STC", "STD", "ADD", "LDCI", "LDD", "LDC", "PUSHI", "PUSHA", "LDB", "LDA", "POUT", "STA", "STB", "RSH", "HLT", "JMP", "SUB", "JC", "JZ", "LDAI", "PIN", "PSTAT", "CMP", "CMPI", "AND", "ANDI", "JNZ", "LDDI", "LDACD", "LDBI", "PUSHB", "JSR", "VLFB", "VFBW", "STACD", "ADDI", "VFBBG", "AVAIL18", "AVAIL19", "AVAIL1A", "AVAIL1B", "AVAIL1C", "AVAIL1D", "AVAIL1E", "AVAIL1E", "AVAIL1F", "AVAIL20", "AVAIL21", "AVAIL22", "AVAIL23", "AVAIL24", "AVAIL25", "AVAIL26", "AVAIL27", "AVAIL28", "AVAIL29", "AVAIL2A", "AVAIL2B", "AVAIL2C", "AVAIL2D", "AVAIL2E", "AVAIL2F", "AVAIL30", "AVAIL31", "RTS", "jsr"],
             "comment": r'\;.*',
             "string": r'".*?"'
         }
@@ -195,7 +195,7 @@ t_scroll = Scrollbar(m_frame)
 t_scroll.pack(side=RIGHT, fill=Y)
 
 # Textbox
-m_text = Text(m_frame, width=150, height=30, font=("Calibri", 16), selectbackground="yellow",
+m_text = Text(m_frame, width=200, height=50, font=("Calibri", 16), selectbackground="yellow",
               selectforeground="black", undo=True)
 m_text.pack(side=RIGHT)
 m_text.bind("<KeyRelease>", lambda e: [highlight_syntax(e), update_cursor_position(e)])
