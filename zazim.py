@@ -42,7 +42,7 @@ def highlight_syntax(e=False):
             "string": r'".*?"|\'.*?\''
         },
         "puls8": {
-            "keywords": ["NOP","nop", "STC","stc", "STD","std", "ADD","add", "LDCI","ldci", "LDD","ldd", "LDC","ldc", "PUSHI","pushi", "PUSHA","pusha", "LDB","ldb", "LDA","lda", "POUT","pout", "STA","sta", "STB","stb", "RSH","rsh", "HLT","hlt", "JMP","jmp", "SUB","sub", "JC","jc", "JZ","jz", "LDAI","ldai", "PIN","pin", "PSTAT","pstat", "CMP","cmp", "CMPI","cmpi", "AND","and", "ANDI","andi", "JNZ","jnz", "LDDI","lddi", "LDACD","ldacd", "LDBI","ldbi", "PUSHB","pushb", "JSR","jsr", "VLFB","vlfb", "VFBW","vfbw", "STACD","stacd", "ADDI","addi", "VFBBG","vfbbg", "AVAIL18","avail18", "AVAIL19","avail19", "AVAIL1A","avail1a", "AVAIL1B","avail1b", "AVAIL1C","avail1c", "AVAIL1D","avail1d", "AVAIL1E", "avail1e", "AVAIL1F","avail1f", "AVAIL20","avail20", "AVAIL21","avail21", "AVAIL22","avail22", "AVAIL23","avail23", "AVAIL24","avail24", "AVAIL25","avail25", "AVAIL26","avail26", "AVAIL27","avail27", "AIL28","avail28", "AVAIL29","avail29", "AVAIL2A","avail2a", "AVAIL2B","avail2b", "AVAIL2C","avail2c", "AVAIL2D","avail2d", "AVAIL2E","avail2e", "AVAIL2F","avail2f", "AVAIL30","avail30", "AVAIL31","avail31", "RTS","rts"],
+            "keywords": ["NOP","nop", "STC","stc", "STD","std", "ADD","add", "LDCI","ldci", "LDD","ldd", "LDC","ldc", "PUSHI","pushi", "PUSHA","pusha", "LDB","ldb", "LDA","lda", "POUT","pout", "STA","sta", "STB","stb", "RSH","rsh", "HLT","hlt", "JMP","jmp", "SUB","sub", "JC","jc", "JZ","jz", "LDAI","ldai", "PIN","pin", "PSTAT","pstat", "CMP","cmp", "CMPI","cmpi", "AND","and", "ANDI","andi", "JNZ","jnz", "LDDI","lddi", "LDACD","ldacd", "LDBI","ldbi", "PUSHB","pushb", "JSR","jsr", "VLFB","vlfb", "VFBW","vfbw", "STACD","stacd", "ADDI","addi", "VFBBG","vfbbg", "AVAIL18","avail18", "AVAIL19","avail19", "AVAIL1A","avail1a", "AVAIL1B","avail1b", "AVAIL1C","avail1c", "AVAIL1D","avail1d", "AVAIL1E", "avail1e", "AVAIL1F","avail1f", "AVAIL20","avail20", "AVAIL21","avail21", "AVAIL22","avail22", "AVAIL23","avail23", "AVAIL24","avail24", "AVAIL25","avail25", "AVAIL26","avail26", "AVAIL27","avail27", "AIL28","avail28", "AVAIL29","avail29", "AVAIL2A","avail2a", "AVAIL2B","avail2b", "AVAIL2C","avail2c", "AVAIL2D","avail2d", "AVAIL2E","avail2e", "AVAIL2F","avail2f", "AVAIL30","avail30", "AVAIL31","avail31", "RTS","rts", "POPA", "POPB"],
             "comment": r'\;.*',
             "string": r'".*?"'
         }
@@ -250,3 +250,4 @@ root.bind("<Control-Key-s>", save_file)
 
 # Start main loop
 root.mainloop()
+
