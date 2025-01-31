@@ -46,17 +46,32 @@ def highlight_syntax(e=False):
             "comment": r'\;.*',
             "string": r'".*?"'
         },
-        
         "c": {
         "keywords": ["auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern", "float", "for", "goto", "if", "inline", "int", "long", "register", "restrict", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"],
         "comment": r'//.*|/\*[\s\S]*?\*/',
         "string": r'".*?"|\'.*?\''
         },
+        "html": {
+        "keywords": [
+            "<html>", "</html>", "<head>", "</head>", "<title>", "</title>", "<body>", "</body>", "<div>", "</div>", "<span>", "</span>",
+            "<script>", "</script>", "<style>", "</style>", "<h1>", "</h1>", "<h2>", "</h2>", "<h3>", "</h3>", "<h4>", "</h4>", "<h5>", "</h5>", "<h6>", "</h6>",
+            "<p>", "</p>", "<a>", "</a>", "<img>", "<ul>", "</ul>", "<ol>", "</ol>", "<li>", "</li>", "<table>", "</table>", "<tr>", "</tr>",
+            "<td>", "</td>", "<th>", "</th>", "<thead>", "</thead>", "<tbody>", "</tbody>", "<form>", "</form>", "<input>", "<button>", "</button>",
+            "<label>", "</label>", "<select>", "</select>", "<option>", "</option>", "<textarea>", "</textarea>", "<meta>", "<link>", "<footer>", "</footer>",
+            "<header>", "</header>", "<section>", "</section>", "<article>", "</article>", "<nav>", "</nav>", "<aside>", "</aside>","<a href=", ">","<img src=", " <a class= ", "<link href=", "<link rel=","<title>","</title>","<meta charset=", "<meta name=","<meta charset="],
+        "comment": r'<!--[\s\S]*?-->',
+       # "string": r'".*?"|\'.*?\''
+    },
+    "css": {
+        "keywords": ["color", "background", "border", "margin", "padding", "width", "height", "display", "position", "top", "left", "right", "bottom", "flex", "grid", "align", "justify", "font", "text", "animation", "transition", "visibility", "opacity", "overflow", "z-index", "clip", "cursor"],
+        "comment": r'/\*[\s\S]*?\*/',
+        "string": r'".*?"|\'.*?\''
+    },
         "cpp": {
         "keywords": ["alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor", "bool", "break", "case", "catch", "char", "char16_t", "char32_t", "class", "const", "const_cast", "continue", "decltype", "default", "delete", "do", "double", "dynamic_cast", "else", "enum", "explicit", "export", "extern", "false", "final", "float", "for", "friend", "goto", "if", "inline", "int", "long", "mutable", "namespace", "new", "noexcept", "not", "not_eq", "nullptr", "operator", "or", "or_eq", "private", "protected", "public", "register", "reinterpret_cast", "return", "short", "signed", "sizeof", "static", "static_assert", "static_cast", "struct", "switch", "template", "this", "thread_local", "throw", "true", "try", "typedef", "typeid", "typename", "union", "unsigned", "using", "virtual", "void", "volatile", "wchar_t", "while"],
         "comment": r'//.*|/\*[\s\S]*?\*/',
         "string": r'".*?"|\'.*?\''
-        }
+        },
     }
 
     # Detect language based on the file extension
@@ -79,6 +94,10 @@ def highlight_syntax(e=False):
         lang = "cpp"
     elif file_extension == "cp":
         lang = "cpp"
+    elif file_extension == "html":
+        lang = "html"
+    elif file_extension == "css":
+        lang = "css"
     else:
         lang = None
 
@@ -86,7 +105,7 @@ def highlight_syntax(e=False):
         rules = syntax_rules[lang]
 
         # Highlight keywords
-        keyword_pattern = r'\b(' + '|'.join(re.escape(keyword) for keyword in rules["keywords"]) + r')\b'
+        keyword_pattern = r'(?<!\w)(' + '|'.join(re.escape(keyword) for keyword in rules["keywords"]) + r')(?!\w)'
         for match in re.finditer(keyword_pattern, m_text.get("1.0", "end-1c")):
             start_idx = f"1.0+{match.start()}c"
             end_idx = f"1.0+{match.end()}c"
@@ -128,7 +147,7 @@ def open_file():
     m_text.delete("1.0", END)
     t_file = filedialog.askopenfilename(initialdir="~/", title="Open File",
                                         filetypes=(("Python", "*.py"), ("Lua Files", "*.lua"), ("Puls8 Files", "*.p8"), 
-                                                   ("JavaScript Files", "*.js"),("C Files", "*.c"),("C++ Files", "*.cpp"),("All Files", "*.*")))
+                                                   ("JavaScript Files", "*.js"),("C Files", "*.c"),("HTML Files", "*.html"),("CSS Files", "*.css"),("C++ Files", "*.cpp"),("All Files", "*.*")))
     if t_file:
         global opened_name
         opened_name = t_file
@@ -145,7 +164,7 @@ def save_as_file(e=False):
     global opened_name
     t_file = filedialog.asksaveasfilename(defaultextension=".py", initialdir="~/", title="Save File",
                                          filetypes=(("Python Files", "*.py"), ("Lua Files", "*.lua"), ("Puls8 Files", "*.p8"), 
-                                                    ("JavaScript Files", "*.js"),("C Files", "*.c"),("C++ Files", "*.cpp"), ("All Files", "*.*")))
+                                                    ("JavaScript Files", "*.js"),("C Files", "*.c"),("C++ Files", "*.cpp"), ("HTML Files", "*.html"),("CSS Files", "*.css"),("All Files", "*.*")))
     opened_name = t_file
     with open(t_file, 'w') as f:
         f.write(m_text.get(1.0, END))
