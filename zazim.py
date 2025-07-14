@@ -6,6 +6,7 @@ from tkinter import font
 from tkinter import messagebox
 import subprocess
 import re
+import json
 
 # Root window setup
 root = Tk()
@@ -18,61 +19,20 @@ opened_name = False
 global selected
 selected = False
 
+
+# Load syntax highlighting rules
+with open("syntax_rules.json", "r") as f:
+    syntax_rules = json.load(f)
+
+
 # Update syntax highlighting for Python, Lua, and JavaScript code
 def highlight_syntax(e=False):
     m_text.tag_remove("keyword", "1.0", END)
     m_text.tag_remove("comment", "1.0", END)
     m_text.tag_remove("string", "1.0", END)
 
-    # Define syntax rules
-    syntax_rules = {
-        "python": {
-            "keywords": ["def", "class", "import", "from", "if", "else", "elif", "for", "while", "return", "break", "continue", "try", "except", "finally", "in", "then"],
-            "comment": r'#.*',
-            "string": r'".*?"|\'.*?\''
-        },
-        "lua": {
-            "keywords": ["function", "end", "if", "then", "else", "elseif", "for", "while", "do", "local", "return", "break"],
-            "comment": r'--.*',
-            "string": r'".*?"|\'.*?\''
-        },
-        "javascript": {
-            "keywords": ["function", "var", "let", "const", "if", "else", "for", "while", "return", "break", "continue", "class", "import", "export", "try", "catch", "finally"],
-            "comment": r'//.*',
-            "string": r'".*?"|\'.*?\''
-        },
-        "puls8": {
-            "keywords": ["NOP","nop", "STC","stc", "STD","std", "ADD","add", "LDCI","ldci", "LDD","ldd", "LDC","ldc", "PUSHI","pushi", "PUSHA","pusha", "LDB","ldb", "LDA","lda", "POUT","pout", "STA","sta", "STB","stb", "RSH","rsh", "HLT","hlt", "JMP","jmp", "SUB","sub", "JC","jc", "JZ","jz", "LDAI","ldai", "PIN","pin", "PSTAT","pstat", "CMP","cmp", "CMPI","cmpi", "AND","and", "ANDI","andi", "JNZ","jnz", "LDDI","lddi", "LDACD","ldacd", "LDBI","ldbi", "PUSHB","pushb", "JSR","jsr", "VLFB","vlfb", "VFBW","vfbw", "STACD","stacd", "ADDI","addi", "VFBBG","vfbbg", "AVAIL18","avail18", "AVAIL19","avail19", "AVAIL1A","avail1a", "AVAIL1B","avail1b", "AVAIL1C","avail1c", "AVAIL1D","avail1d", "AVAIL1E", "avail1e", "AVAIL1F","avail1f", "AVAIL20","avail20", "AVAIL21","avail21", "AVAIL22","avail22", "AVAIL23","avail23", "AVAIL24","avail24", "AVAIL25","avail25", "AVAIL26","avail26", "AVAIL27","avail27", "AIL28","avail28", "AVAIL29","avail29", "AVAIL2A","avail2a", "AVAIL2B","avail2b", "AVAIL2C","avail2c", "AVAIL2D","avail2d", "AVAIL2E","avail2e", "AVAIL2F","avail2f", "AVAIL30","avail30", "AVAIL31","avail31", "RTS","rts","PUSHC","PUSHD","SUBI","POPC","POPD"],
-            "comment": r'\;.*',
-            "string": r'".*?"'
-        },
-        "c": {
-        "keywords": ["auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern", "float", "for", "goto", "if", "inline", "int", "long", "register", "restrict", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"],
-        "comment": r'//.*|/\*[\s\S]*?\*/',
-        "string": r'".*?"|\'.*?\''
-        },
-        "html": {
-        "keywords": [
-            "<html>", "</html>", "<head>", "</head>", "<title>", "</title>", "<body>", "</body>", "<div>", "</div>", "<span>", "</span>",
-            "<script>", "</script>", "<style>", "</style>", "<h1>", "</h1>", "<h2>", "</h2>", "<h3>", "</h3>", "<h4>", "</h4>", "<h5>", "</h5>", "<h6>", "</h6>",
-            "<p>", "</p>", "<a>", "</a>", "<img>", "<ul>", "</ul>", "<ol>", "</ol>", "<li>", "</li>", "<table>", "</table>", "<tr>", "</tr>",
-            "<td>", "</td>", "<th>", "</th>", "<thead>", "</thead>", "<tbody>", "</tbody>", "<form>", "</form>", "<input>", "<button>", "</button>",
-            "<label>", "</label>", "<select>", "</select>", "<option>", "</option>", "<textarea>", "</textarea>", "<meta>", "<link>", "<footer>", "</footer>",
-            "<header>", "</header>", "<section>", "</section>", "<article>", "</article>", "<nav>", "</nav>", "<aside>", "</aside>","<a href=", ">","<img src=", " <a class= ", "<link href=", "<link rel=","<title>","</title>","<meta charset=", "<meta name=","<meta charset="],
-        "comment": r'<!--[\s\S]*?-->',
-       # "string": r'".*?"|\'.*?\''
-    },
-    "css": {
-        "keywords": ["color", "background", "border", "margin", "padding", "width", "height", "display", "position", "top", "left", "right", "bottom", "flex", "grid", "align", "justify", "font", "text", "animation", "transition", "visibility", "opacity", "overflow", "z-index", "clip", "cursor"],
-        "comment": r'/\*[\s\S]*?\*/',
-        "string": r'".*?"|\'.*?\''
-    },
-        "cpp": {
-        "keywords": ["alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor", "bool", "break", "case", "catch", "char", "char16_t", "char32_t", "class", "const", "const_cast", "continue", "decltype", "default", "delete", "do", "double", "dynamic_cast", "else", "enum", "explicit", "export", "extern", "false", "final", "float", "for", "friend", "goto", "if", "inline", "int", "long", "mutable", "namespace", "new", "noexcept", "not", "not_eq", "nullptr", "operator", "or", "or_eq", "private", "protected", "public", "register", "reinterpret_cast", "return", "short", "signed", "sizeof", "static", "static_assert", "static_cast", "struct", "switch", "template", "this", "thread_local", "throw", "true", "try", "typedef", "typeid", "typename", "union", "unsigned", "using", "virtual", "void", "volatile", "wchar_t", "while"],
-        "comment": r'//.*|/\*[\s\S]*?\*/',
-        "string": r'".*?"|\'.*?\''
-        },
-    }
+   # Load syntax rulea
+    global syntax_rules
 
     # Detect language based on the file extension
     file_extension = (opened_name.split('.')[-1] if opened_name else "").lower()
