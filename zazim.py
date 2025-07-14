@@ -25,7 +25,7 @@ with open("syntax_rules.json", "r") as f:
     syntax_rules = json.load(f)
 
 
-# Update syntax highlighting for Python, Lua, and JavaScript code
+# Update syntax highlighting
 def highlight_syntax(e=False):
     m_text.tag_remove("keyword", "1.0", END)
     m_text.tag_remove("comment", "1.0", END)
