@@ -19,11 +19,9 @@ opened_name = False
 global selected
 selected = False
 
-
 # Load syntax highlighting rules
 with open("syntax_rules.json", "r") as f:
     syntax_rules = json.load(f)
-
 
 # Update syntax highlighting
 def highlight_syntax(e=False):
@@ -31,10 +29,8 @@ def highlight_syntax(e=False):
     m_text.tag_remove("comment", "1.0", END)
     m_text.tag_remove("string", "1.0", END)
 
-   # Load syntax rulea
     global syntax_rules
 
-    # Detect language based on the file extension
     file_extension = (opened_name.split('.')[-1] if opened_name else "").lower()
     if file_extension == "py":
         lang = "python"
@@ -46,13 +42,7 @@ def highlight_syntax(e=False):
         lang = "puls8"
     elif file_extension == "c":
         lang = "c"
-    elif file_extension == "cpp":
-        lang = "cpp"
-    elif file_extension == "cc":
-        lang = "cpp"
-    elif file_extension == "c++":
-        lang = "cpp"
-    elif file_extension == "cp":
+    elif file_extension in ["cpp", "cc", "c++", "cp"]:
         lang = "cpp"
     elif file_extension == "html":
         lang = "html"
@@ -64,7 +54,6 @@ def highlight_syntax(e=False):
     if lang and lang in syntax_rules:
         rules = syntax_rules[lang]
 
-        # Highlight keywords
         keyword_pattern = r'(?<!\w)(' + '|'.join(re.escape(keyword) for keyword in rules["keywords"]) + r')(?!\w)'
         for match in re.finditer(keyword_pattern, m_text.get("1.0", "end-1c")):
             start_idx = f"1.0+{match.start()}c"
@@ -72,7 +61,6 @@ def highlight_syntax(e=False):
             m_text.tag_add("keyword", start_idx, end_idx)
             m_text.tag_configure("keyword", foreground="blue")
 
-        # Highlight comments
         comment_pattern = rules["comment"]
         for match in re.finditer(comment_pattern, m_text.get("1.0", "end-1c")):
             start_idx = f"1.0+{match.start()}c"
@@ -80,7 +68,6 @@ def highlight_syntax(e=False):
             m_text.tag_add("comment", start_idx, end_idx)
             m_text.tag_configure("comment", foreground="green")
 
-        # Highlight strings
         string_pattern = rules["string"]
         for match in re.finditer(string_pattern, m_text.get("1.0", "end-1c")):
             start_idx = f"1.0+{match.start()}c"
@@ -88,13 +75,11 @@ def highlight_syntax(e=False):
             m_text.tag_add("string", start_idx, end_idx)
             m_text.tag_configure("string", foreground="red")
 
-# Update the line counter at the bottom of the screen to show the current line
 def update_cursor_position(event=None):
     cursor_position = m_text.index(INSERT)
     current_line = cursor_position.split('.')[0]
     line_count_label.config(text=f"Line: {current_line}")
 
-# Create new file
 def new_file():
     m_text.delete("1.0", END)
     root.title("New File")
@@ -102,7 +87,6 @@ def new_file():
     opened_name = False
     update_cursor_position()
 
-# Open file and determine syntax
 def open_file():
     m_text.delete("1.0", END)
     t_file = filedialog.askopenfilename(initialdir="~/", title="Open File",
@@ -116,10 +100,9 @@ def open_file():
             stuff = f.read()
         m_text.insert(END, stuff)
         root.title(f"Editing: {name}")
-        highlight_syntax()  # Trigger syntax highlighting after loading
+        highlight_syntax()
         update_cursor_position()
 
-# Save file
 def save_as_file(e=False):
     global opened_name
     t_file = filedialog.asksaveasfilename(defaultextension=".py", initialdir="~/", title="Save File",
@@ -139,7 +122,6 @@ def save_file(e=False):
     else:
         save_as_file()
 
-# Cut text
 def cut_text(e=False):
     global selected
     if e:
@@ -151,7 +133,6 @@ def cut_text(e=False):
             root.clipboard_clear()
             root.clipboard_append(selected)
 
-# Copy text
 def copy_text(e=False):
     global selected
     if e:
@@ -161,7 +142,6 @@ def copy_text(e=False):
         root.clipboard_clear()
         root.clipboard_append(selected)
 
-# Paste text
 def paste_text(e=False):
     global selected
     if e:
@@ -171,36 +151,54 @@ def paste_text(e=False):
             position = m_text.index(INSERT)
             m_text.insert(position, selected)
 
-# Select all
 def select_all(e=False):
     m_text.tag_add('sel', '1.0', 'end')
 
-# Clear all
 def clear_all(e=False):
     m_text.delete(1.0, END)
 
-# Run Python code
 def run_code():
     try:
         exec(m_text.get(1.0, END))
     except Exception as e:
         messagebox.showerror("Error", f"Error executing code:\n{str(e)}")
 
+# settings
+def apply_resolution(res):
+    if res == "Fullscreen":
+        root.attributes("-fullscreen", True)
+    else:
+        root.attributes("-fullscreen", False)
+        root.geometry(res)
+
+dark_mode_enabled = False
+def toggle_dark_mode():
+    global dark_mode_enabled
+    dark_mode_enabled = not dark_mode_enabled
+
+    bg_color = "#2E3440" if dark_mode_enabled else "white"
+    fg_color = "#D8DEE9" if dark_mode_enabled else "black"
+    insert_bg = "#D8DEE9" if dark_mode_enabled else "black"
+
+    m_text.config(bg=bg_color, fg=fg_color, insertbackground=insert_bg)
+    line_count_label.config(bg=bg_color, fg=fg_color)
+
+    m_menu.config(bg=bg_color, fg=fg_color)
+    for menu in [f_menu, e_menu, r_menu, s_menu]:
+        menu.config(bg=bg_color, fg=fg_color)
+
 # Frame and Text Widget
 m_frame = Frame(root)
 m_frame.pack(pady=5, padx=5)
 
-# Scrollbar
 t_scroll = Scrollbar(m_frame)
 t_scroll.pack(side=RIGHT, fill=Y)
 
-# Textbox
 m_text = Text(m_frame, width=200, height=50, font=("Calibri", 16), selectbackground="yellow",
               selectforeground="black", undo=True)
 m_text.pack(side=RIGHT)
 m_text.bind("<KeyRelease>", lambda e: [highlight_syntax(e), update_cursor_position(e)])
 
-# Config scrollbar
 t_scroll.config(command=m_text.yview)
 m_text.config(yscrollcommand=t_scroll.set)
 
@@ -208,7 +206,6 @@ m_text.config(yscrollcommand=t_scroll.set)
 m_menu = Menu(root)
 root.config(menu=m_menu)
 
-# File menu
 f_menu = Menu(m_menu, tearoff=False)
 m_menu.add_cascade(label="File", menu=f_menu)
 f_menu.add_command(label="New", command=new_file)
@@ -218,7 +215,6 @@ f_menu.add_command(label="Save as", command=save_as_file)
 f_menu.add_separator()
 f_menu.add_command(label="Exit", command=root.quit)
 
-# Edit menu
 e_menu = Menu(m_menu, tearoff=False)
 m_menu.add_cascade(label="Edit", menu=e_menu)
 e_menu.add_command(label="Cut   (Ctrl+X)", command=cut_text)
@@ -231,16 +227,28 @@ e_menu.add_separator()
 e_menu.add_command(label="Select All", command=select_all)
 e_menu.add_command(label="Clear", command=clear_all)
 
-# Run menu
 r_menu = Menu(m_menu, tearoff=False)
 m_menu.add_cascade(label="Run", menu=r_menu)
 r_menu.add_command(label="Run Python", command=run_code)
 
-# Line count label at the bottom
+s_menu = Menu(m_menu, tearoff=False)
+m_menu.add_cascade(label="Settings", menu=s_menu)
+
+res_menu = Menu(s_menu, tearoff=False)
+s_menu.add_cascade(label="Resolution", menu=res_menu)
+res_menu.add_command(label="800x600", command=lambda: apply_resolution("800x600"))
+res_menu.add_command(label="1024x768", command=lambda: apply_resolution("1024x768"))
+res_menu.add_command(label="1280x720", command=lambda: apply_resolution("1280x720"))
+res_menu.add_command(label="Fullscreen", command=lambda: apply_resolution("Fullscreen"))
+
+s_menu.add_separator()
+s_menu.add_command(label="Toggle Dark Mode", command=toggle_dark_mode)
+
+# Status bar
 line_count_label = Label(root, text="Line: 1", bd=1, relief=SUNKEN, anchor=W)
 line_count_label.pack(fill=X, side=BOTTOM)
 
-# Bind keyboard shortcuts
+# Keyboard shortcuts
 root.bind("<Control-Key-x>", cut_text)
 root.bind("<Control-Key-c>", copy_text)
 root.bind("<Control-Key-v>", paste_text)
@@ -250,3 +258,4 @@ root.bind("<Control-Key-s>", save_file)
 
 # Start main loop
 root.mainloop()
+
