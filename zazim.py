@@ -171,7 +171,7 @@ def apply_resolution(res):
         root.attributes("-fullscreen", False)
         root.geometry(res)
 
-dark_mode_enabled = True  # Enable dark mode by default
+dark_mode_enabled = True  
 
 def toggle_dark_mode():
     global dark_mode_enabled
@@ -269,7 +269,6 @@ root.bind('<Control-Key-A>', select_all)
 root.bind('<Control-Key-a>', select_all)
 root.bind("<Control-Key-s>", save_file)
 
-# Apply dark mode on startup
 if dark_mode_enabled:
     apply_dark_mode()
 
