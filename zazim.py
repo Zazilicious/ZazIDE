@@ -171,7 +171,8 @@ def apply_resolution(res):
         root.attributes("-fullscreen", False)
         root.geometry(res)
 
-dark_mode_enabled = False
+dark_mode_enabled = True  # Enable dark mode by default
+
 def toggle_dark_mode():
     global dark_mode_enabled
     dark_mode_enabled = not dark_mode_enabled
@@ -179,6 +180,18 @@ def toggle_dark_mode():
     bg_color = "#2E3440" if dark_mode_enabled else "white"
     fg_color = "#D8DEE9" if dark_mode_enabled else "black"
     insert_bg = "#D8DEE9" if dark_mode_enabled else "black"
+
+    m_text.config(bg=bg_color, fg=fg_color, insertbackground=insert_bg)
+    line_count_label.config(bg=bg_color, fg=fg_color)
+
+    m_menu.config(bg=bg_color, fg=fg_color)
+    for menu in [f_menu, e_menu, r_menu, s_menu]:
+        menu.config(bg=bg_color, fg=fg_color)
+
+def apply_dark_mode():
+    bg_color = "#2E3440"
+    fg_color = "#D8DEE9"
+    insert_bg = "#D8DEE9"
 
     m_text.config(bg=bg_color, fg=fg_color, insertbackground=insert_bg)
     line_count_label.config(bg=bg_color, fg=fg_color)
@@ -256,6 +269,9 @@ root.bind('<Control-Key-A>', select_all)
 root.bind('<Control-Key-a>', select_all)
 root.bind("<Control-Key-s>", save_file)
 
+# Apply dark mode on startup
+if dark_mode_enabled:
+    apply_dark_mode()
+
 # Start main loop
 root.mainloop()
-
