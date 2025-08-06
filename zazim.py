@@ -268,6 +268,7 @@ root.bind("<Control-Key-v>", paste_text)
 root.bind('<Control-Key-A>', select_all)
 root.bind('<Control-Key-a>', select_all)
 root.bind("<Control-Key-s>", save_file)
+root.bind("<Command-Key-s>", save_file)
 
 if dark_mode_enabled:
     apply_dark_mode()
