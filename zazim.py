@@ -200,6 +200,19 @@ def apply_dark_mode():
     for menu in [f_menu, e_menu, r_menu, s_menu]:
         menu.config(bg=bg_color, fg=fg_color)
 
+# Automatic indentation
+def auto_indent(event):
+    cursor_index = m_text.index(INSERT)
+    line_number = cursor_index.split('.')[0]
+    current_line_text = m_text.get(f"{line_number}.0", f"{line_number}.end")
+    indentation = re.match(r"[ \t]*", current_line_text).group()
+    if current_line_text.rstrip().endswith(":"):
+        indentation += "    "
+    m_text.insert(cursor_index, "\n" + indentation)
+    m_text.mark_set(INSERT, f"{line_number}.end + {len(indentation)+1}c")
+    return "break"
+
+
 # Frame and Text Widget
 m_frame = Frame(root)
 m_frame.pack(pady=5, padx=5)
@@ -211,6 +224,7 @@ m_text = Text(m_frame, width=200, height=50, font=("Calibri", 16), selectbackgro
               selectforeground="black", undo=True)
 m_text.pack(side=RIGHT)
 m_text.bind("<KeyRelease>", lambda e: [highlight_syntax(e), update_cursor_position(e)])
+m_text.bind("<Return>", auto_indent)
 
 t_scroll.config(command=m_text.yview)
 m_text.config(yscrollcommand=t_scroll.set)
