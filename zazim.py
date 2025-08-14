@@ -7,6 +7,17 @@ from tkinter import messagebox
 import subprocess
 import re
 import json
+import os
+import sys
+
+# Pyinstaller stuff
+def resource_path(relative_path: str) -> str:
+    """
+    Get absolute path to resource, works for dev and for PyInstaller.
+    When bundled, PyInstaller stores data files in a temp folder accessible via sys._MEIPASS.
+    """
+    base_path = getattr(sys, "_MEIPASS", os.path.abspath("."))
+    return os.path.join(base_path, relative_path)
 
 # Root window setup
 root = Tk()
@@ -19,11 +30,22 @@ opened_name = False
 global selected
 selected = False
 
-# Load syntax highlighting rules
-with open("syntax_rules.json", "r") as f:
-    syntax_rules = json.load(f)
+# Load syntax highlighting rules (uses resource_path for PyInstaller)
+try:
+    with open(resource_path("syntax_rules.json"), "r", encoding="utf-8") as f:
+        syntax_rules = json.load(f)
+except Exception as e:
+    syntax_rules = {}
+    messagebox.showerror(
+        "syntax_rules.json not found",
+        f"Could not load syntax_rules.json:\n{e}\n\n"
+        "If you are running a bundled executable, ensure you passed --add-data:\n"
+        "  Windows: pyinstaller --add-data \"syntax_rules.json;.\" ...\n"
+        "  macOS/Linux: pyinstaller --add-data \"syntax_rules.json:.\" ..."
+    )
 
 # Update syntax highlighting
+
 def highlight_syntax(e=False):
     m_text.tag_remove("keyword", "1.0", END)
     m_text.tag_remove("comment", "1.0", END)
