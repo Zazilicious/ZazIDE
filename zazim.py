@@ -176,7 +176,7 @@ def paste_text(e=False):
 
 # find text
 def find_text(e=False):
-    def do_find():
+    def do_find(*_):
         query = entry.get()
         m_text.tag_remove("highlight", "1.0", "end")
         if not query:
@@ -191,10 +191,8 @@ def find_text(e=False):
                 break
             end_idx = f"{idx}+{len(query)}c"
             m_text.tag_add("highlight", idx, end_idx)
-
             if first_match_idx is None:
                 first_match_idx = idx
-
             start_pos = end_idx
 
         if first_match_idx:
@@ -203,24 +201,44 @@ def find_text(e=False):
         else:
             messagebox.showinfo("Find", f"No matches for: {query}")
 
-    def on_close():
+    def on_close(*_):
         m_text.tag_remove("highlight", "1.0", "end")
         popup.destroy()
 
+    # Popup
     popup = tk.Toplevel(root)
     popup.title("Find")
-    popup.geometry("300x80")
     popup.transient(root)
     popup.grab_set()
+    popup.resizable(False, False)          # prevent weird partial clipping
+    # Don’t force a tiny geometry; let Tk compute a good size:
+    # popup.geometry("300x120")           # (optional) if you really want a size
 
-    tk.Label(popup, text="Enter text to find:").pack(pady=5)
-    entry = tk.Entry(popup, width=30)
-    entry.pack(pady=2)
-    entry.focus()
+    # Layout (grid avoids crowding)
+    popup.columnconfigure(0, weight=1)
 
-    tk.Button(popup, text="Find", command=do_find).pack(pady=5)
+    lbl = tk.Label(popup, text="Enter text to find:")
+    lbl.grid(row=0, column=0, padx=10, pady=(10, 4), sticky="w")
 
+    entry = tk.Entry(popup, width=32)
+    entry.grid(row=1, column=0, padx=10, pady=4, sticky="ew")
+    entry.focus_set()
+
+    btn_frame = tk.Frame(popup)
+    btn_frame.grid(row=2, column=0, padx=10, pady=(6, 10), sticky="e")
+
+    btn_find = tk.Button(btn_frame, text="Find", command=do_find, default="active")
+    btn_find.pack(side="right", padx=(6, 0))
+
+    btn_close = tk.Button(btn_frame, text="Close", command=on_close)
+    btn_close.pack(side="right")
+
+    # Bindings
+    popup.bind("<Return>", do_find)   # Press Enter anywhere in the popup to search
+    entry.bind("<Return>", do_find)   # (redundant but ensures it fires when entry focused)
+    popup.bind("<Escape>", on_close)
     popup.protocol("WM_DELETE_WINDOW", on_close)
+
 
 # select all
 def select_all(e=False):
