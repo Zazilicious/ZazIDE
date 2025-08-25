@@ -204,17 +204,13 @@ def find_text(e=False):
     def on_close(*_):
         m_text.tag_remove("highlight", "1.0", "end")
         popup.destroy()
-
-    # Popup
+        
     popup = tk.Toplevel(root)
     popup.title("Find")
     popup.transient(root)
     popup.grab_set()
-    popup.resizable(False, False)          # prevent weird partial clipping
-    # Don’t force a tiny geometry; let Tk compute a good size:
-    # popup.geometry("300x120")           # (optional) if you really want a size
+    popup.resizable(False, False)          
 
-    # Layout (grid avoids crowding)
     popup.columnconfigure(0, weight=1)
 
     lbl = tk.Label(popup, text="Enter text to find:")
@@ -233,9 +229,9 @@ def find_text(e=False):
     btn_close = tk.Button(btn_frame, text="Close", command=on_close)
     btn_close.pack(side="right")
 
-    # Bindings
-    popup.bind("<Return>", do_find)   # Press Enter anywhere in the popup to search
-    entry.bind("<Return>", do_find)   # (redundant but ensures it fires when entry focused)
+    
+    popup.bind("<Return>", do_find)  
+    entry.bind("<Return>", do_find)   
     popup.bind("<Escape>", on_close)
     popup.protocol("WM_DELETE_WINDOW", on_close)
 
