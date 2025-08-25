@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import font
 from tkinter import messagebox
+from tkinter import simpledialog
 import subprocess
 import re
 import json
@@ -96,19 +97,19 @@ def highlight_syntax(e=False):
             end_idx = f"1.0+{match.end()}c"
             m_text.tag_add("string", start_idx, end_idx)
             m_text.tag_configure("string", foreground="red")
-
+# i[date cursor 
 def update_cursor_position(event=None):
     cursor_position = m_text.index(INSERT)
     current_line = cursor_position.split('.')[0]
     line_count_label.config(text=f"Line: {current_line}")
-
+# new file
 def new_file():
     m_text.delete("1.0", END)
     root.title("New File")
     global opened_name
     opened_name = False
     update_cursor_position()
-
+# open file
 def open_file():
     m_text.delete("1.0", END)
     t_file = filedialog.askopenfilename(initialdir="~/", title="Open File",
@@ -124,7 +125,7 @@ def open_file():
         root.title(f"Editing: {name}")
         highlight_syntax()
         update_cursor_position()
-
+#save file as
 def save_as_file(e=False):
     global opened_name
     t_file = filedialog.asksaveasfilename(defaultextension=".py", initialdir="~/", title="Save File",
@@ -134,7 +135,7 @@ def save_as_file(e=False):
     with open(t_file, 'w') as f:
         f.write(m_text.get(1.0, END))
     root.title(f"Editing: {opened_name}")
-
+# save file
 def save_file(e=False):
     global opened_name
     if opened_name:
@@ -143,7 +144,7 @@ def save_file(e=False):
         messagebox.showinfo("Saved", "File saved successfully")
     else:
         save_as_file()
-
+# cut text
 def cut_text(e=False):
     global selected
     if e:
@@ -154,7 +155,7 @@ def cut_text(e=False):
             m_text.delete("sel.first", "sel.last")
             root.clipboard_clear()
             root.clipboard_append(selected)
-
+# copy text
 def copy_text(e=False):
     global selected
     if e:
@@ -163,7 +164,7 @@ def copy_text(e=False):
         selected = m_text.selection_get()
         root.clipboard_clear()
         root.clipboard_append(selected)
-
+# paste text
 def paste_text(e=False):
     global selected
     if e:
@@ -173,12 +174,61 @@ def paste_text(e=False):
             position = m_text.index(INSERT)
             m_text.insert(position, selected)
 
+# find text
+def find_text(e=False):
+    def do_find():
+        query = entry.get()
+        m_text.tag_remove("highlight", "1.0", "end")
+        if not query:
+            return
+
+        m_text.tag_config("highlight", background="yellow", foreground="black")
+        start_pos = "1.0"
+        first_match_idx = None
+        while True:
+            idx = m_text.search(query, start_pos, stopindex="end", nocase=1)
+            if not idx:
+                break
+            end_idx = f"{idx}+{len(query)}c"
+            m_text.tag_add("highlight", idx, end_idx)
+
+            if first_match_idx is None:
+                first_match_idx = idx
+
+            start_pos = end_idx
+
+        if first_match_idx:
+            m_text.mark_set("insert", first_match_idx)
+            m_text.see(first_match_idx)
+        else:
+            messagebox.showinfo("Find", f"No matches for: {query}")
+
+    def on_close():
+        m_text.tag_remove("highlight", "1.0", "end")
+        popup.destroy()
+
+    popup = tk.Toplevel(root)
+    popup.title("Find")
+    popup.geometry("300x80")
+    popup.transient(root)
+    popup.grab_set()
+
+    tk.Label(popup, text="Enter text to find:").pack(pady=5)
+    entry = tk.Entry(popup, width=30)
+    entry.pack(pady=2)
+    entry.focus()
+
+    tk.Button(popup, text="Find", command=do_find).pack(pady=5)
+
+    popup.protocol("WM_DELETE_WINDOW", on_close)
+
+# select all
 def select_all(e=False):
     m_text.tag_add('sel', '1.0', 'end')
-
+# clear all
 def clear_all(e=False):
     m_text.delete(1.0, END)
-
+# run code
 def run_code():
     try:
         exec(m_text.get(1.0, END))
@@ -193,6 +243,7 @@ def apply_resolution(res):
         root.attributes("-fullscreen", False)
         root.geometry(res)
 
+# dark mode stuff
 dark_mode_enabled = True  
 
 def toggle_dark_mode():
@@ -275,6 +326,7 @@ e_menu.add_command(label="Redo", command=m_text.edit_redo)
 e_menu.add_separator()
 e_menu.add_command(label="Select All", command=select_all)
 e_menu.add_command(label="Clear", command=clear_all)
+e_menu.add_command(label="Find", command=find_text)
 
 r_menu = Menu(m_menu, tearoff=False)
 m_menu.add_cascade(label="Run", menu=r_menu)
@@ -305,7 +357,8 @@ root.bind('<Control-Key-A>', select_all)
 root.bind('<Control-Key-a>', select_all)
 root.bind("<Control-Key-s>", save_file)
 root.bind("<Command-Key-s>", save_file)
-
+root.bind("<Control-Key-f>", lambda e: find_text())
+# more dark mode stuff
 if dark_mode_enabled:
     apply_dark_mode()
 
