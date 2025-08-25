@@ -113,8 +113,8 @@ def new_file():
 def open_file():
     m_text.delete("1.0", END)
     t_file = filedialog.askopenfilename(initialdir="~/", title="Open File",
-                                        filetypes=(("Python", "*.py"), ("Lua Files", "*.lua"), ("Puls8 Files", "*.p8"), 
-                                                   ("JavaScript Files", "*.js"),("C Files", "*.c"),("HTML Files", "*.html"),("CSS Files", "*.css"),("C++ Files", "*.cpp"),("All Files", "*.*")))
+                                        filetypes=(("All Files", "*.*"),("Python", "*.py"), ("Lua Files", "*.lua"), ("Puls8 Files", "*.p8"), 
+                                                   ("JavaScript Files", "*.js"),("C Files", "*.c"),("HTML Files", "*.html"),("CSS Files", "*.css"),("C++ Files", "*.cpp")))
     if t_file:
         global opened_name
         opened_name = t_file
@@ -129,8 +129,8 @@ def open_file():
 def save_as_file(e=False):
     global opened_name
     t_file = filedialog.asksaveasfilename(defaultextension=".py", initialdir="~/", title="Save File",
-                                         filetypes=(("Python Files", "*.py"), ("Lua Files", "*.lua"), ("Puls8 Files", "*.p8"), 
-                                                    ("JavaScript Files", "*.js"),("C Files", "*.c"),("C++ Files", "*.cpp"), ("HTML Files", "*.html"),("CSS Files", "*.css"),("All Files", "*.*")))
+                                         filetypes=(("All Files", "*.*"),("Python Files", "*.py"), ("Lua Files", "*.lua"), ("Puls8 Files", "*.p8"), 
+                                                    ("JavaScript Files", "*.js"),("C Files", "*.c"),("C++ Files", "*.cpp"), ("HTML Files", "*.html"),("CSS Files", "*.css"),()))
     opened_name = t_file
     with open(t_file, 'w') as f:
         f.write(m_text.get(1.0, END))
