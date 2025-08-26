@@ -176,40 +176,104 @@ def paste_text(e=False):
 
 # find text
 def find_text(e=False):
-    def do_find(*_):
+    def do_find(event=None):
         query = entry.get()
         m_text.tag_remove("highlight", "1.0", "end")
+        m_text.tag_remove("current_match", "1.0", "end")
+        popup.matches = []
+        popup.current_idx = -1
+        popup.last_query = query
+
         if not query:
+            if event is not None:
+                return "break"
             return
 
         m_text.tag_config("highlight", background="yellow", foreground="black")
+        m_text.tag_config("current_match", background="orange", foreground="black")
+
         start_pos = "1.0"
-        first_match_idx = None
         while True:
             idx = m_text.search(query, start_pos, stopindex="end", nocase=1)
             if not idx:
                 break
             end_idx = f"{idx}+{len(query)}c"
             m_text.tag_add("highlight", idx, end_idx)
-            if first_match_idx is None:
-                first_match_idx = idx
+            popup.matches.append((idx, end_idx))
             start_pos = end_idx
 
-        if first_match_idx:
-            m_text.mark_set("insert", first_match_idx)
-            m_text.see(first_match_idx)
+        if popup.matches:
+            popup.current_idx = 0
+            start, end = popup.matches[0]
+            try:
+                m_text.tag_remove("sel", "1.0", "end")
+            except:
+                pass
+            m_text.tag_add("current_match", start, end)
+            m_text.mark_set("insert", start)
+            m_text.see(start)
+            btn_find.focus_set()
         else:
             messagebox.showinfo("Find", f"No matches for: {query}")
 
+        if event is not None:
+            return "break"
+
+    def goto_match(index):
+        """Jump to the match at popup.matches[index] and update highlighting."""
+        if not popup.matches:
+            return
+        index %= len(popup.matches)
+        popup.current_idx = index
+        start, end = popup.matches[index]
+
+        m_text.tag_remove("current_match", "1.0", "end")
+        m_text.tag_add("current_match", start, end)
+
+        m_text.mark_set("insert", start)
+        m_text.see(start)
+        try:
+            m_text.tag_remove("sel", "1.0", "end")
+        except:
+            pass
+        m_text.tag_add("sel", start, end)
+
+    def next_match(event=None):
+        """Go to next match; if no matches yet, run find first."""
+        query = entry.get()
+        if not getattr(popup, "matches", None) or getattr(popup, "last_query", None) != query:
+            do_find()
+            return "break"
+        if not popup.matches:
+            return "break"
+        goto_match(popup.current_idx + 1)
+        return "break"
+
+    def prev_match(event=None):
+        """Go to previous match."""
+        if not getattr(popup, "matches", None):
+            return "break"
+        goto_match(popup.current_idx - 1)
+        return "break"
+
     def on_close(*_):
         m_text.tag_remove("highlight", "1.0", "end")
+        m_text.tag_remove("current_match", "1.0", "end")
+        try:
+            m_text.tag_remove("sel", "1.0", "end")
+        except:
+            pass
         popup.destroy()
-        
+
     popup = tk.Toplevel(root)
     popup.title("Find")
     popup.transient(root)
     popup.grab_set()
-    popup.resizable(False, False)          
+    popup.resizable(False, False)
+
+    popup.matches = []
+    popup.current_idx = -1
+    popup.last_query = None
 
     popup.columnconfigure(0, weight=1)
 
@@ -229,9 +293,9 @@ def find_text(e=False):
     btn_close = tk.Button(btn_frame, text="Close", command=on_close)
     btn_close.pack(side="right")
 
-    
-    popup.bind("<Return>", do_find)  
-    entry.bind("<Return>", do_find)   
+    entry.bind("<Return>", do_find)
+    popup.bind("<Return>", next_match)
+    popup.bind("<Shift-Return>", prev_match)
     popup.bind("<Escape>", on_close)
     popup.protocol("WM_DELETE_WINDOW", on_close)
 
