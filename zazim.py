@@ -220,7 +220,6 @@ def find_text(e=False):
             return "break"
 
     def goto_match(index):
-        """Jump to the match at popup.matches[index] and update highlighting."""
         if not popup.matches:
             return
         index %= len(popup.matches)
@@ -239,7 +238,6 @@ def find_text(e=False):
         m_text.tag_add("sel", start, end)
 
     def next_match(event=None):
-        """Go to next match; if no matches yet, run find first."""
         query = entry.get()
         if not getattr(popup, "matches", None) or getattr(popup, "last_query", None) != query:
             do_find()
@@ -250,7 +248,6 @@ def find_text(e=False):
         return "break"
 
     def prev_match(event=None):
-        """Go to previous match."""
         if not getattr(popup, "matches", None):
             return "break"
         goto_match(popup.current_idx - 1)
