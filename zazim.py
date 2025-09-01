@@ -97,7 +97,7 @@ def highlight_syntax(e=False):
             end_idx = f"1.0+{match.end()}c"
             m_text.tag_add("string", start_idx, end_idx)
             m_text.tag_configure("string", foreground="red")
-# i[date cursor 
+# update cursor 
 def update_cursor_position(event=None):
     cursor_position = m_text.index(INSERT)
     current_line = cursor_position.split('.')[0]
